@@ -1,0 +1,275 @@
+# Neigh. 1: İnönü Mah.
+# Neigh. 2: Koyunoğlu Mah.
+# Neigh. 3: Çukurdere Mah.
+# Neigh. 4: Zaviye Mah.
+# Neigh. 5: Çavuşoğlu Mah.
+# Neigh. 6: Bentbaşı Mah. + İlyas Mah. + Salköprü Mah.
+# Neigh. 7: Seyran Mah.
+# Neigh. 8: Özalper Mah.
+# Neigh. 9: Turgut Özal Mah.
+# Neigh. 10: Çilesiz Mah.
+
+
+
+
+import pandas as pd
+import tkinter as tk
+from tkinter import ttk
+from PIL import Image, ImageTk
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import r2_score, mean_absolute_error
+
+# Veri seti (senin verdiğin)
+# Mevcut data'nın devamı olarak ekle
+
+import pandas as pd
+import random
+
+# Mevcut data
+data = {
+    "m2_net": [120, 130, 120, 110, 182, 70,
+               70, 150, 120, 90, 95, 180,
+               85, 100, 130, 170, 110, 140,
+               240, 60, 140, 100, 200, 140,
+               120, 140, 40, 160, 100, 130,
+               170, 180, 170, 110, 135, 100,
+               150, 50, 95, 150, 150, 120,
+               130, 135, 135, 93, 70, 85,
+               160, 100, 160, 65, 125, 130,
+               145, 90, 190, 145, 75, 200,
+               95, 150, 210, 420, 120, 150,
+               180, 130, 170, 140, 130, 180,
+               200, 110, 145],
+    
+    "rooms": [3, 4, 3, 3, 4, 3,
+              2, 4, 4, 3, 4, 4,
+              3, 3, 4, 4, 4, 4,
+              7, 2, 4, 3, 5, 4,
+              4, 4, 2, 4, 3, 4,
+              4, 5, 4, 4, 4, 4,
+              4, 2, 3, 4, 4, 4,
+              4, 4, 4, 4, 3, 3,
+              5, 3, 5, 3, 4, 4,
+              4, 3, 5, 4, 3, 5,
+              4, 5, 5, 8, 4, 4,
+              4, 4, 4, 4, 4, 5,
+              5, 4, 4],
+    
+    "bathes": [1, 2, 1, 1, 2, 1,
+               1, 2, 2, 1, 1, 1,
+               1, 1, 1, 2, 1, 1,
+               2, 1, 1, 1, 2, 1,
+               1, 1, 1, 1, 1, 1,
+               2, 1, 2, 1, 1, 1,
+               1, 1, 1, 1, 1, 1,
+               1, 1, 1, 1, 1, 1,
+               2, 1, 2, 1, 1, 2,
+               1, 1, 2, 2, 1, 2,
+               1, 2, 2, 3, 1, 1,
+               2, 1, 2, 2, 2, 2,
+               2, 1, 2],
+    
+    "floor": [3, 4, 1, 1, 6, 3,
+              4, 4, 3, 2, 1, 2,
+              3, 4, 2, 4, 1, 2,
+              4, 2, 5, 1, 4, 2,
+              1, 1, 2, 2, 3, 4,
+              4, 2, 1, 2, 3, 3,
+              1, 3, 1, 3, 2, 1,
+              2, 1, 2, 1, 3, 2,
+              4, 3, 2, 2, 2, 3,
+              3, 1, 2, 1, 2, 3,
+              1, 3, 5, 9, 5, 2,
+              5, 2, 9, 4, 4, 1,
+              7, 2, 13],
+    
+    "elevator": [1, 1, 1, 0, 1, 1,
+                 1, 1, 1, 0, 0, 1,
+                 1, 1, 1, 1, 0, 0,
+                 0, 1, 1, 1, 1, 0,
+                 0, 1, 1, 1, 0, 1,
+                 1, 1, 1, 0, 1, 1,
+                 1, 1, 1, 1, 1, 1,
+                 1, 1, 1, 1, 1, 1,
+                 1, 1, 1, 1, 1, 1,
+                 0, 1, 1, 1, 1, 1,
+                 1, 1, 1, 1, 1, 1,
+                 1, 1, 1, 1, 1, 1,
+                 1, 1, 1],
+    
+    "aprtAge": [6, 10, 12, 22, 6, 1,
+                4, 15, 12, 22, 24, 12,
+                1, 1, 4, 6, 6, 15, 
+                20, 1, 2, 3, 12, 22,
+                30, 4, 1, 6, 27, 2,
+                7, 2, 12, 8, 4, 2,
+                13, 3, 7, 8, 9, 13,
+                6, 4, 1, 3, 3, 2,
+                6, 4, 3, 7, 7, 3,
+                16, 1, 1, 12, 3, 17,
+                6, 2, 16, 12, 16, 17,
+                16, 25, 6, 12, 13, 1,
+                6, 7, 6],
+    
+    "neighborhood": [1, 1, 1, 1, 1, 1,
+                     1, 1, 2, 2, 2, 2,
+                     2, 2, 2, 3, 3, 3,
+                     3, 3, 4, 4, 4, 4,
+                     4, 4, 4, 4, 4, 4,
+                     4, 4, 4, 4, 5, 5,
+                     5, 5, 5, 6, 6, 6,
+                     6, 6, 6, 6, 6, 6,
+                     6, 7, 7, 7, 7, 7,
+                     7, 7, 8, 8, 8, 8,
+                     8, 9, 9, 9, 9, 9,
+                     9, 9, 10, 10, 10,
+                     10, 10, 10, 10],
+    
+    "heating": ["combi", "combi", "combi", "combi", "combi",
+                "combi", "combi", "combi", "combi", "combi",
+                "combi", "combi", "combi", "combi", "combi",
+                "combi", "combi", "combi", "combi", "combi",
+                "combi","combi", "combi", "combi", "combi",
+                "combi", "combi", "combi", "combi", "combi",
+                "combi", "combi", "combi", "combi", "combi",
+                "combi", "combi", "combi", "combi", "combi",
+                "combi", "combi", "combi", "combi", "combi",
+                "combi", "combi", "combi", "combi", "combi",
+                "combi", "combi", "combi", "combi", "combi",
+                "combi", "combi", "combi", "combi", "combi",
+                "combi", "combi", "combi", "combi", "combi",
+                "combi", "combi", "combi", "combi", "combi",
+                "combi", "combi", "combi", "combi", "combi"],
+    
+    "balconies": [1, 1, 1, 1, 2, 1,
+                  1, 1, 2, 1, 1, 2,
+                  1, 1, 1, 1, 1, 1,
+                  2, 1, 1, 1, 2, 1,
+                  1, 1, 1, 1, 1, 1,
+                  1, 1, 2, 1, 1, 2,
+                  2, 1, 1, 1, 1, 1,
+                  1, 1, 1, 1, 0, 1,
+                  2, 1, 2, 0, 1, 1,
+                  1, 1, 2, 1, 1, 2,
+                  1, 2, 2, 2, 1, 1,
+                  1, 1, 2, 2, 1, 2,
+                  1, 1, 1],
+    
+    "Price": [2700000, 3000000, 2400000, 1500000, 4300000, 2700000,
+              2250000, 2800000, 2900000, 1600000, 1300000, 3000000,
+              2900000, 2700000, 3100000, 3500000, 2200000, 2550000,
+              2900000, 2300000, 3700000, 2800000, 4600000, 1600000,
+              1550000, 2800000, 2500000, 3000000, 1800000, 3800000,
+              3600000, 4500000, 3800000, 2500000, 2600000, 2500000,
+              2400000, 1900000, 2300000, 3000000, 2700000, 2300000,
+              2600000, 2400000, 3900000, 3300000, 2000000, 3200000,
+              3900000, 2800000, 4150000, 1800000, 3000000, 2900000,
+              2600000, 2900000, 5500000, 3000000, 2600000, 4500000,
+              2900000, 5000000, 3700000, 6200000, 2900000, 3000000,
+              3800000, 2000000, 3400000, 3400000, 3200000, 5500000,
+              4600000, 2800000, 3000000]
+}
+
+
+
+
+
+
+
+
+# DataFrame'e çevirmek:
+df = pd.DataFrame(data)
+
+X = df.drop("Price", axis=1)
+y = df["Price"]
+
+categorical_features = ["heating"]
+numeric_features = [col for col in X.columns if col not in categorical_features]
+
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('cat', OneHotEncoder(), categorical_features),
+        ('num', 'passthrough', numeric_features)
+    ]
+)
+
+model = Pipeline(steps=[
+    ('preprocessor', preprocessor),
+    ('regressor', RandomForestRegressor(n_estimators=100, random_state=42))
+])
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+model.fit(X_train, y_train)
+
+# Test setinde tahmin yap
+y_pred = model.predict(X_test)
+
+# R2 ve MAE skorlarını hesapla
+r2 = r2_score(y_test, y_pred)
+mae = mean_absolute_error(y_test, y_pred)
+
+print(f"R2 Score: {r2:.4f}")
+print(f"Mean Absolute Error: {mae:,.0f} TL")
+
+
+# --- TKINTER ARAYÜZ ---
+root = tk.Tk()
+root.title("House Price Estimate")
+
+# Fotoğraf ekleme
+try:
+    img = Image.open("house.jpeg")  # kendi fotoğraf yolun
+    img = img.resize((400, 300))
+    photo = ImageTk.PhotoImage(img)
+    tk.Label(root, image=photo).pack()
+except:
+    tk.Label(root, text="[The photo wasn't uploaded']").pack()
+
+fields = {}
+labels = ["Net m²", "The number of the rooms", "The number of the bathes", "The floor", "Elevator (0/1)", "The age of the apartment", "neighborhood (1-10)", "Heating (combi only)", "The number of the balconies"]
+for label in labels:
+    frame = tk.Frame(root)
+    frame.pack(pady=2)
+    tk.Label(frame, text=label, width=20, anchor="w").pack(side="left")
+    entry = tk.Entry(frame)
+    entry.pack(side="left")
+    fields[label] = entry
+
+result_label = tk.Label(root, text="", font=("Arial", 14))
+result_label.pack(pady=10)
+
+def predict_price():
+    try:
+        m2_net = int(fields["Net m²"].get())
+        rooms = int(fields["The number of the rooms"].get())
+        bathes = int(fields["The number of the bathes"].get())
+        floor = int(fields["The floor"].get())
+        elevator = int(fields["Elevator (0/1)"].get())
+        aprtAge = int(fields["The age of the apartment"].get())
+        neighborhood = int(fields["neighborhood (1-10)"].get())
+        heating = fields["Heating (combi only)"].get()
+        balconies = int(fields["The number of the balconies"].get())
+
+        new_house = pd.DataFrame({
+            "m2_net": [m2_net],
+            "rooms": [rooms],
+            "bathes": [bathes],
+            "floor": [floor],
+            "elevator": [elevator],
+            "aprtAge": [aprtAge],
+            "neighborhood": [neighborhood],
+            "heating": [heating],
+            "balconies": [balconies]
+        })
+
+        prediction = model.predict(new_house)[0]
+        result_label.config(text=f"Estimated Price: {prediction:,.0f} TL")
+    except Exception as e:
+        result_label.config(text=f"Hata: {e}")
+
+tk.Button(root, text="Make a guess", command=predict_price, bg="green", fg="white").pack(pady=10)
+
+root.mainloop()
