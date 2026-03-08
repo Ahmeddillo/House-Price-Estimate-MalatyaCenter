@@ -181,14 +181,14 @@ data = {
 
 
 
-# DataFrame'e çevirmek:
-df = pd.DataFrame(data)
+# Convert to dataframe:
+df = pd.DataFrame(data) # for analyzing the data
 
-X = df.drop("Price", axis=1)
+X = df.drop("Price", axis=1) # target feature.
 y = df["Price"]
 
 categorical_features = ["heating"]
-numeric_features = [col for col in X.columns if col not in categorical_features]
+numeric_features = [col for col in X.columns if col not in categorical_features] #leave the numeric features 
 
 preprocessor = ColumnTransformer(
     transformers=[
@@ -271,5 +271,6 @@ def predict_price():
         result_label.config(text=f"Hata: {e}")
 
 tk.Button(root, text="Make a guess", command=predict_price, bg="green", fg="white").pack(pady=10)
+
 
 root.mainloop()
