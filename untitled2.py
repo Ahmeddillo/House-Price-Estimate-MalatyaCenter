@@ -190,7 +190,7 @@ y = df["Price"]
 categorical_features = ["heating"]
 numeric_features = [col for col in X.columns if col not in categorical_features] #leave the numeric features 
 
-preprocessor = ColumnTransformer(
+preprocessor = ColumnTransformer( # here we don't touch the bumeric features, and only transformed the catagorical features
     transformers=[
         ('cat', OneHotEncoder(), categorical_features),
         ('num', 'passthrough', numeric_features)
@@ -198,16 +198,16 @@ preprocessor = ColumnTransformer(
 )
 
 model = Pipeline(steps=[
-    ('preprocessor', preprocessor),
-    ('regressor', RandomForestRegressor(n_estimators=100, random_state=42))
+    ('preprocessor', preprocessor), # you have to do the upper conversation
+    ('regressor', RandomForestRegressor(n_estimators=100, random_state=42)) #Random Forest method
 ])
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 model.fit(X_train, y_train)
 
-# Test setinde tahmin yap
+# predict in the test set
 y_pred = model.predict(X_test)
 
-# R2 ve MAE skorlarını hesapla
+# Count the R2 and MAE scores
 r2 = r2_score(y_test, y_pred)
 mae = mean_absolute_error(y_test, y_pred)
 
@@ -274,3 +274,4 @@ tk.Button(root, text="Make a guess", command=predict_price, bg="green", fg="whit
 
 
 root.mainloop()
+
